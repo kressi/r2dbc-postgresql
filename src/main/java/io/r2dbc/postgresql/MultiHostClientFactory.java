@@ -1,7 +1,7 @@
 package io.r2dbc.postgresql;
 
 import io.r2dbc.postgresql.client.Client;
-import io.r2dbc.postgresql.client.MultipleHostsConfiguration;
+import io.r2dbc.postgresql.client.MultiHostConfiguration;
 import io.r2dbc.postgresql.codec.DefaultCodecs;
 import io.r2dbc.postgresql.util.Assert;
 import io.r2dbc.spi.IsolationLevel;
@@ -23,18 +23,18 @@ import static io.r2dbc.postgresql.TargetServerType.MASTER;
 import static io.r2dbc.postgresql.TargetServerType.PREFER_SECONDARY;
 import static io.r2dbc.postgresql.TargetServerType.SECONDARY;
 
-class MultipleHostsClientFactory extends ClientFactoryBase {
+class MultiHostClientFactory extends ClientFactoryBase {
 
     private final List<SocketAddress> addresses;
 
-    private final MultipleHostsConfiguration configuration;
+    private final MultiHostConfiguration configuration;
 
     private final Map<SocketAddress, HostSpecStatus> statusMap = new ConcurrentHashMap<>();
 
-    public MultipleHostsClientFactory(PostgresqlConnectionConfiguration configuration, ClientSupplier clientSupplier) {
+    public MultiHostClientFactory(PostgresqlConnectionConfiguration configuration, ClientSupplier clientSupplier) {
         super(configuration, clientSupplier);
-        this.configuration = Assert.requireNonNull(configuration.getMultipleHostsConfiguration(), "MultipleHostsConfiguration must not be null");
-        this.addresses = MultipleHostsClientFactory.createSocketAddress(this.configuration);
+        this.configuration = Assert.requireNonNull(configuration.getMultiHostConfiguration(), "multiHostConfiguration must not be null");
+        this.addresses = MultiHostClientFactory.createSocketAddress(this.configuration);
     }
 
     @Override
@@ -77,9 +77,9 @@ class MultipleHostsClientFactory extends ClientFactoryBase {
                 : Mono.empty()));
     }
 
-    private static List<SocketAddress> createSocketAddress(MultipleHostsConfiguration configuration) {
+    private static List<SocketAddress> createSocketAddress(MultiHostConfiguration configuration) {
         List<SocketAddress> addressList = new ArrayList<>(configuration.getHosts().size());
-        for (MultipleHostsConfiguration.ServerHost host : configuration.getHosts()) {
+        for (MultiHostConfiguration.ServerHost host : configuration.getHosts()) {
             addressList.add(InetSocketAddress.createUnresolved(host.getHost(), host.getPort()));
         }
         return addressList;
@@ -135,12 +135,12 @@ class MultipleHostsClientFactory extends ClientFactoryBase {
 
     private Mono<Client> tryConnectToCandidate(TargetServerType targetServerType, SocketAddress candidate, @Nullable Map<String, String> options) {
         return Mono.create(sink -> this.tryConnectToEndpoint(candidate, options).subscribe(client -> {
-            this.statusMap.compute(candidate, (a, oldStatus) -> MultipleHostsClientFactory.evaluateStatus(candidate, oldStatus));
+            this.statusMap.compute(candidate, (a, oldStatus) -> MultiHostClientFactory.evaluateStatus(candidate, oldStatus));
             if (targetServerType == ANY) {
                 sink.success(client);
                 return;
             }
-            MultipleHostsClientFactory.isPrimaryServer(client, super.getConfiguration()).subscribe(
+            MultiHostClientFactory.isPrimaryServer(client, super.getConfiguration()).subscribe(
                 isPrimary -> {
                     if (isPrimary) {
                         this.statusMap.put(candidate, HostSpecStatus.primary(candidate));

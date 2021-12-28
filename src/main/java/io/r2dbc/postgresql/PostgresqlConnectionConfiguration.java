@@ -23,7 +23,7 @@ import io.netty.handler.ssl.SslContextBuilder;
 import io.netty.handler.ssl.util.InsecureTrustManagerFactory;
 import io.r2dbc.postgresql.client.ConnectionSettings;
 import io.r2dbc.postgresql.client.DefaultHostnameVerifier;
-import io.r2dbc.postgresql.client.MultipleHostsConfiguration;
+import io.r2dbc.postgresql.client.MultiHostConfiguration;
 import io.r2dbc.postgresql.client.SSLConfig;
 import io.r2dbc.postgresql.client.SSLMode;
 import io.r2dbc.postgresql.client.SingleHostConfiguration;
@@ -94,7 +94,7 @@ public final class PostgresqlConnectionConfiguration {
     @Nullable
     private final LoopResources loopResources;
 
-    private final MultipleHostsConfiguration multipleHostsConfiguration;
+    private final MultiHostConfiguration multiHostConfiguration;
 
     private final LogLevel noticeLogLevel;
 
@@ -123,7 +123,7 @@ public final class PostgresqlConnectionConfiguration {
                                               LogLevel errorResponseLogLevel,
                                               List<Extension> extensions, ToIntFunction<String> fetchSize, boolean forceBinary, @Nullable Duration lockWaitTimeout,
                                               @Nullable LoopResources loopResources,
-                                              @Nullable MultipleHostsConfiguration multipleHostsConfiguration,
+                                              @Nullable MultiHostConfiguration multiHostConfiguration,
                                               LogLevel noticeLogLevel, @Nullable Map<String, String> options, @Nullable CharSequence password, boolean preferAttachedBuffers,
                                               int preparedStatementCacheQueries, @Nullable String schema,
                                               @Nullable SingleHostConfiguration singleHostConfiguration,
@@ -140,7 +140,7 @@ public final class PostgresqlConnectionConfiguration {
         this.fetchSize = fetchSize;
         this.forceBinary = forceBinary;
         this.loopResources = loopResources;
-        this.multipleHostsConfiguration = multipleHostsConfiguration;
+        this.multiHostConfiguration = multiHostConfiguration;
         this.noticeLogLevel = noticeLogLevel;
         this.options = options == null ? new LinkedHashMap<>() : new LinkedHashMap<>(options);
         this.statementTimeout = statementTimeout;
@@ -191,7 +191,7 @@ public final class PostgresqlConnectionConfiguration {
             ", forceBinary='" + this.forceBinary + '\'' +
             ", lockWaitTimeout='" + this.lockWaitTimeout +
             ", loopResources='" + this.loopResources + '\'' +
-            ", multipleHostsConfiguration='" + this.multipleHostsConfiguration + '\'' +
+            ", multiHostConfiguration='" + this.multiHostConfiguration + '\'' +
             ", noticeLogLevel='" + this.noticeLogLevel + '\'' +
             ", options='" + this.options + '\'' +
             ", password='" + obfuscate(this.password != null ? this.password.length() : 0) + '\'' +
@@ -236,8 +236,8 @@ public final class PostgresqlConnectionConfiguration {
 
 
     @Nullable
-    public MultipleHostsConfiguration getMultipleHostsConfiguration() {
-        return multipleHostsConfiguration;
+    MultiHostConfiguration getMultiHostConfiguration() {
+        return this.multiHostConfiguration;
     }
 
     @Nullable
@@ -259,8 +259,8 @@ public final class PostgresqlConnectionConfiguration {
     }
 
     @Nullable
-    public SingleHostConfiguration getSingleHostConfiguration() {
-        return singleHostConfiguration;
+    SingleHostConfiguration getSingleHostConfiguration() {
+        return this.singleHostConfiguration;
     }
 
     String getUsername() {
@@ -341,7 +341,7 @@ public final class PostgresqlConnectionConfiguration {
         private Duration lockWaitTimeout;
 
         @Nullable
-        private MultipleHostsConfiguration.Builder multipleHostsConfiguration;
+        private MultiHostConfiguration.Builder multiHostConfiguration;
 
         private LogLevel noticeLogLevel = LogLevel.DEBUG;
 
@@ -423,17 +423,17 @@ public final class PostgresqlConnectionConfiguration {
          * @return a configured {@link PostgresqlConnectionConfiguration}
          */
         public PostgresqlConnectionConfiguration build() {
+
             SingleHostConfiguration singleHostConfiguration = this.singleHostConfiguration != null
                 ? this.singleHostConfiguration.build()
                 : null;
-            MultipleHostsConfiguration multipleHostsConfiguration = this.multipleHostsConfiguration != null
-                ? this.multipleHostsConfiguration.build()
+
+            MultiHostConfiguration multiHostConfiguration = this.multiHostConfiguration != null
+                ? this.multiHostConfiguration.build()
                 : null;
-            if (singleHostConfiguration == null && multipleHostsConfiguration == null) {
-                throw new IllegalArgumentException("Either multiple hosts configuration or single host configuration should be provided");
-            }
-            if (singleHostConfiguration != null && multipleHostsConfiguration != null) {
-                throw new IllegalArgumentException("Either multiple hosts configuration or single host configuration should be provided");
+
+            if (!(singleHostConfiguration == null ^ multiHostConfiguration == null)) {
+                throw new IllegalArgumentException("either multiHostConfiguration or singleHostConfiguration must not be null");
             }
 
             if (this.username == null) {
@@ -444,7 +444,7 @@ public final class PostgresqlConnectionConfiguration {
                 this.extensions,
                 this.fetchSize,
                 this.forceBinary, this.lockWaitTimeout, this.loopResources,
-                multipleHostsConfiguration,
+                multiHostConfiguration,
                 this.noticeLogLevel, this.options, this.password, this.preferAttachedBuffers,
                 this.preparedStatementCacheQueries, this.schema,
                 singleHostConfiguration,
@@ -593,10 +593,10 @@ public final class PostgresqlConnectionConfiguration {
          */
         public Builder addHost(String host) {
             Assert.requireNonNull(host, "host must not be null");
-            if (this.multipleHostsConfiguration == null) {
-                this.multipleHostsConfiguration = MultipleHostsConfiguration.builder();
+            if (this.multiHostConfiguration == null) {
+                this.multiHostConfiguration = MultiHostConfiguration.builder();
             }
-            this.multipleHostsConfiguration.addHost(host);
+            this.multiHostConfiguration.addHost(host);
             return this;
         }
 
@@ -610,10 +610,10 @@ public final class PostgresqlConnectionConfiguration {
          */
         public Builder addHost(String host, int port) {
             Assert.requireNonNull(host, "host must not be null");
-            if (this.multipleHostsConfiguration == null) {
-                this.multipleHostsConfiguration = MultipleHostsConfiguration.builder();
+            if (this.multiHostConfiguration == null) {
+                this.multiHostConfiguration = MultiHostConfiguration.builder();
             }
-            this.multipleHostsConfiguration.addHost(host, port);
+            this.multiHostConfiguration.addHost(host, port);
             return this;
         }
 
@@ -624,10 +624,10 @@ public final class PostgresqlConnectionConfiguration {
          * @return this {@link Builder}
          */
         public Builder hostRecheckTime(int hostRecheckTime) {
-            if (this.multipleHostsConfiguration == null) {
-                this.multipleHostsConfiguration = MultipleHostsConfiguration.builder();
+            if (this.multiHostConfiguration == null) {
+                this.multiHostConfiguration = MultiHostConfiguration.builder();
             }
-            this.multipleHostsConfiguration.hostRecheckTime(hostRecheckTime);
+            this.multiHostConfiguration.hostRecheckTime(hostRecheckTime);
             return this;
         }
 
@@ -638,10 +638,10 @@ public final class PostgresqlConnectionConfiguration {
          * @return this {@link Builder}
          */
         public Builder loadBalanceHosts(boolean loadBalanceHosts) {
-            if (this.multipleHostsConfiguration == null) {
-                this.multipleHostsConfiguration = MultipleHostsConfiguration.builder();
+            if (this.multiHostConfiguration == null) {
+                this.multiHostConfiguration = MultiHostConfiguration.builder();
             }
-            this.multipleHostsConfiguration.loadBalanceHosts(loadBalanceHosts);
+            this.multiHostConfiguration.loadBalanceHosts(loadBalanceHosts);
             return this;
         }
 
@@ -772,6 +772,24 @@ public final class PostgresqlConnectionConfiguration {
         }
 
         /**
+         * Configure the unix domain socket to connect to.
+         *
+         * @param socket the socket path
+         * @return this {@link Builder}
+         * @throws IllegalArgumentException if {@code socket} is {@code null}
+         */
+        public Builder socket(String socket) {
+            Assert.requireNonNull(socket, "host must not be null");
+            if (this.singleHostConfiguration == null) {
+                this.singleHostConfiguration = SingleHostConfiguration.builder();
+            }
+            this.singleHostConfiguration.socket(socket);
+
+            sslMode(SSLMode.DISABLE);
+            return this;
+        }
+
+        /**
          * Configure a {@link SslContextBuilder} customizer. The customizer gets applied on each SSL connection attempt to allow for just-in-time configuration updates. The {@link Function} gets
          * called with the prepared {@link SslContextBuilder} that has all configuration options applied. The customizer may return the same builder or return a new builder instance to be used to
          * build the SSL context.
@@ -885,24 +903,6 @@ public final class PostgresqlConnectionConfiguration {
         }
 
         /**
-         * Configure the unix domain socket to connect to.
-         *
-         * @param socket the socket path
-         * @return this {@link Builder}
-         * @throws IllegalArgumentException if {@code socket} is {@code null}
-         */
-        public Builder socket(String socket) {
-            Assert.requireNonNull(socket, "host must not be null");
-            if (this.singleHostConfiguration == null) {
-                this.singleHostConfiguration = SingleHostConfiguration.builder();
-            }
-            this.singleHostConfiguration.socket(socket);
-
-            sslMode(SSLMode.DISABLE);
-            return this;
-        }
-
-        /**
          * Configure the Statement timeout. Default unconfigured.
          * <p>
          * This parameter is applied once after creating a new connection.
@@ -929,10 +929,10 @@ public final class PostgresqlConnectionConfiguration {
          * @throws IllegalArgumentException if {@code targetServerType} is {@code null}
          */
         public Builder targetServerType(TargetServerType targetServerType) {
-            if (this.multipleHostsConfiguration == null) {
-                this.multipleHostsConfiguration = MultipleHostsConfiguration.builder();
+            if (this.multiHostConfiguration == null) {
+                this.multiHostConfiguration = MultiHostConfiguration.builder();
             }
-            this.multipleHostsConfiguration.targetServerType(targetServerType);
+            this.multiHostConfiguration.targetServerType(targetServerType);
             return this;
         }
         
@@ -988,7 +988,7 @@ public final class PostgresqlConnectionConfiguration {
                 ", forceBinary='" + this.forceBinary + '\'' +
                 ", lockWaitTimeout='" + this.lockWaitTimeout + '\'' +
                 ", loopResources='" + this.loopResources + '\'' +
-                ", multipleHostsConfiguration='" + this.multipleHostsConfiguration + '\'' +
+                ", multiHostConfiguration='" + this.multiHostConfiguration + '\'' +
                 ", noticeLogLevel='" + this.noticeLogLevel + '\'' +
                 ", parameters='" + this.options + '\'' +
                 ", password='" + obfuscate(this.password != null ? this.password.length() : 0) + '\'' +

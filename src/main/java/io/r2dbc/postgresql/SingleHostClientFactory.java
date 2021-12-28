@@ -29,12 +29,13 @@ class SingleHostClientFactory extends ClientFactoryBase {
         if (!configuration.isUseSocket()) {
             return InetSocketAddress.createUnresolved(configuration.getRequiredHost(), configuration.getPort());
         }
+        return DomainSocketFactory.getDomainSocketAddress(configuration);
+    }
 
-        if (configuration.isUseSocket()) {
+    static class DomainSocketFactory {
+        private static DomainSocketAddress getDomainSocketAddress(SingleHostConfiguration configuration) {
             return new DomainSocketAddress(configuration.getRequiredSocket());
         }
-
-        throw new IllegalArgumentException("Cannot create SocketAddress for " + configuration);
     }
 
 }

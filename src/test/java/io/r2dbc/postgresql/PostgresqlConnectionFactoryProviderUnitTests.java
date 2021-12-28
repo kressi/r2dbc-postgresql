@@ -16,7 +16,7 @@
 
 package io.r2dbc.postgresql;
 
-import io.r2dbc.postgresql.client.MultipleHostsConfiguration;
+import io.r2dbc.postgresql.client.MultiHostConfiguration;
 import io.r2dbc.postgresql.client.SSLConfig;
 import io.r2dbc.postgresql.client.SSLMode;
 import io.r2dbc.postgresql.extension.Extension;
@@ -481,14 +481,14 @@ final class PostgresqlConnectionFactoryProviderUnitTests {
             .build());
 
         assertThat(factory.getConfiguration().getSingleHostConfiguration()).isNull();
-        assertThat(factory.getConfiguration().getMultipleHostsConfiguration().isLoadBalanceHosts()).isEqualTo(true);
-        assertThat(factory.getConfiguration().getMultipleHostsConfiguration().getHostRecheckTime()).isEqualTo(20000);
-        assertThat(factory.getConfiguration().getMultipleHostsConfiguration().getTargetServerType()).isEqualTo(TargetServerType.SECONDARY);
-        List<MultipleHostsConfiguration.ServerHost> hosts = factory.getConfiguration().getMultipleHostsConfiguration().getHosts();
+        assertThat(factory.getConfiguration().getMultiHostConfiguration().isLoadBalanceHosts()).isEqualTo(true);
+        assertThat(factory.getConfiguration().getMultiHostConfiguration().getHostRecheckTime()).isEqualTo(20000);
+        assertThat(factory.getConfiguration().getMultiHostConfiguration().getTargetServerType()).isEqualTo(TargetServerType.SECONDARY);
+        List<MultiHostConfiguration.ServerHost> hosts = factory.getConfiguration().getMultiHostConfiguration().getHosts();
         assertThat(hosts).hasSize(3);
-        assertThat(hosts.get(0)).usingRecursiveComparison().isEqualTo(new MultipleHostsConfiguration.ServerHost("host1", 5433));
-        assertThat(hosts.get(1)).usingRecursiveComparison().isEqualTo(new MultipleHostsConfiguration.ServerHost("host2", 5432));
-        assertThat(hosts.get(2)).usingRecursiveComparison().isEqualTo(new MultipleHostsConfiguration.ServerHost("host3", 5432));
+        assertThat(hosts.get(0)).usingRecursiveComparison().isEqualTo(new MultiHostConfiguration.ServerHost("host1", 5433));
+        assertThat(hosts.get(1)).usingRecursiveComparison().isEqualTo(new MultiHostConfiguration.ServerHost("host2", 5432));
+        assertThat(hosts.get(2)).usingRecursiveComparison().isEqualTo(new MultiHostConfiguration.ServerHost("host3", 5432));
     }
 
     @Test

@@ -8,7 +8,7 @@ import java.util.List;
 
 import static io.r2dbc.postgresql.PostgresqlConnectionConfiguration.DEFAULT_PORT;
 
-public class MultipleHostsConfiguration {
+public class MultiHostConfiguration {
 
     private final List<ServerHost> hosts;
 
@@ -18,7 +18,7 @@ public class MultipleHostsConfiguration {
 
     private final TargetServerType targetServerType;
 
-    public MultipleHostsConfiguration(List<ServerHost> hosts, int hostRecheckTime, boolean loadBalanceHosts, TargetServerType targetServerType) {
+    public MultiHostConfiguration(List<ServerHost> hosts, int hostRecheckTime, boolean loadBalanceHosts, TargetServerType targetServerType) {
         this.hosts = hosts;
         this.hostRecheckTime = hostRecheckTime;
         this.loadBalanceHosts = loadBalanceHosts;
@@ -43,7 +43,7 @@ public class MultipleHostsConfiguration {
 
     @Override
     public String toString() {
-        return "MultipleHostsConfiguration{" +
+        return "MultiHostConfiguration{" +
             "hosts=" + this.hosts +
             ", hostRecheckTime=" + this.hostRecheckTime +
             ", loadBalanceHosts=" + this.loadBalanceHosts +
@@ -89,7 +89,7 @@ public class MultipleHostsConfiguration {
     }
 
     /**
-     * A builder for {@link MultipleHostsConfiguration} instances.
+     * A builder for {@link MultiHostConfiguration} instances.
      * <p>
      * <i>This class is not threadsafe</i>
      */
@@ -168,16 +168,16 @@ public class MultipleHostsConfiguration {
         }
 
         /**
-         * Returns a configured {@link MultipleHostsConfiguration}.
+         * Returns a configured {@link MultiHostConfiguration}.
          *
-         * @return a configured {@link MultipleHostsConfiguration}
+         * @return a configured {@link MultiHostConfiguration}
          */
-        public MultipleHostsConfiguration build() {
+        public MultiHostConfiguration build() {
             if (this.hosts.isEmpty()) {
                 throw new IllegalArgumentException("At least one host should be provided");
             }
 
-            return new MultipleHostsConfiguration(this.hosts, this.hostRecheckTime, this.loadBalanceHosts, this.targetServerType);
+            return new MultiHostConfiguration(this.hosts, this.hostRecheckTime, this.loadBalanceHosts, this.targetServerType);
         }
 
         @Override

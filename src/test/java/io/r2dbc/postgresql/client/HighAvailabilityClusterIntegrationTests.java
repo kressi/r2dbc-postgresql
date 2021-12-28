@@ -26,7 +26,7 @@ public class HighAvailabilityClusterIntegrationTests {
 
     @Test
     void testMultipleCallsOnSameFactory() {
-        PostgresqlConnectionFactory connectionFactory = this.multipleHostsConnectionFactory(TargetServerType.PREFER_SECONDARY, SERVERS.getPrimary(), SERVERS.getStandby());
+        PostgresqlConnectionFactory connectionFactory = this.multiHostConnectionFactory(TargetServerType.PREFER_SECONDARY, SERVERS.getPrimary(), SERVERS.getStandby());
 
         connectionFactory
             .create()
@@ -162,7 +162,7 @@ public class HighAvailabilityClusterIntegrationTests {
     }
 
     private Mono<Boolean> isConnectedToPrimary(TargetServerType targetServerType, PostgreSQLContainer<?>... servers) {
-        PostgresqlConnectionFactory connectionFactory = this.multipleHostsConnectionFactory(targetServerType, servers);
+        PostgresqlConnectionFactory connectionFactory = this.multiHostConnectionFactory(targetServerType, servers);
 
         return connectionFactory
             .create()
@@ -179,7 +179,7 @@ public class HighAvailabilityClusterIntegrationTests {
             .next();
     }
 
-    private PostgresqlConnectionFactory multipleHostsConnectionFactory(TargetServerType targetServerType, PostgreSQLContainer<?>... servers) {
+    private PostgresqlConnectionFactory multiHostConnectionFactory(TargetServerType targetServerType, PostgreSQLContainer<?>... servers) {
         PostgreSQLContainer<?> firstServer = servers[0];
         PostgresqlConnectionConfiguration.Builder builder = PostgresqlConnectionConfiguration.builder();
         for (PostgreSQLContainer<?> server : servers) {

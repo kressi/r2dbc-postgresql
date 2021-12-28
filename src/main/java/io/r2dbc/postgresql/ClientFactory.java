@@ -12,8 +12,8 @@ public interface ClientFactory {
         if (configuration.getSingleHostConfiguration() != null) {
             return new SingleHostClientFactory(configuration, clientSupplier);
         }
-        if (configuration.getMultipleHostsConfiguration() != null) {
-            return new MultipleHostsClientFactory(configuration, clientSupplier);
+        if (configuration.getMultiHostConfiguration() != null) {
+            return new MultiHostClientFactory(configuration, clientSupplier);
         }
         throw new IllegalArgumentException("Can't build client factory based on configuration " + configuration);
     }

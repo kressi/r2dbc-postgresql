@@ -107,7 +107,7 @@ public class SingleHostConfiguration {
         }
 
         /**
-         * Configure the port.  Defaults to {@code 5432}.
+         * Configure the port. Defaults to {@code 5432}.
          *
          * @param port the port
          * @return this {@link Builder}

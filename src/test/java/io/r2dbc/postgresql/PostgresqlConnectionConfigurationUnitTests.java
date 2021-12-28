@@ -42,7 +42,7 @@ final class PostgresqlConnectionConfigurationUnitTests {
     @Test
     void builderNoHostConfiguration() {
         assertThatIllegalArgumentException().isThrownBy(() -> PostgresqlConnectionConfiguration.builder().build())
-            .withMessage("Either multiple hosts configuration or single host configuration should be provided");
+            .withMessage("either multiHostConfiguration or singleHostConfiguration must not be null");
     }
 
     @Test
