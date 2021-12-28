@@ -33,7 +33,7 @@ class SingleHostClientFactory extends ClientFactoryBase {
     }
 
     static class DomainSocketFactory {
-        private static DomainSocketAddress getDomainSocketAddress(SingleHostConfiguration configuration) {
+        private static SocketAddress getDomainSocketAddress(SingleHostConfiguration configuration) {
             return new DomainSocketAddress(configuration.getRequiredSocket());
         }
     }

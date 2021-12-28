@@ -476,13 +476,13 @@ final class PostgresqlConnectionFactoryProviderUnitTests {
             .option(HOST, "host1:5433,host2:5432,host3")
             .option(USER, "postgres")
             .option(LOAD_BALANCE_HOSTS, true)
-            .option(HOST_RECHECK_TIME, 20000)
+            .option(HOST_RECHECK_TIME, Duration.ofMillis(20000))
             .option(TARGET_SERVER_TYPE, TargetServerType.SECONDARY)
             .build());
 
         assertThat(factory.getConfiguration().getSingleHostConfiguration()).isNull();
         assertThat(factory.getConfiguration().getMultiHostConfiguration().isLoadBalanceHosts()).isEqualTo(true);
-        assertThat(factory.getConfiguration().getMultiHostConfiguration().getHostRecheckTime()).isEqualTo(20000);
+        assertThat(factory.getConfiguration().getMultiHostConfiguration().getHostRecheckTime()).isEqualTo(Duration.ofMillis(20000));
         assertThat(factory.getConfiguration().getMultiHostConfiguration().getTargetServerType()).isEqualTo(TargetServerType.SECONDARY);
         List<MultiHostConfiguration.ServerHost> hosts = factory.getConfiguration().getMultiHostConfiguration().getHosts();
         assertThat(hosts).hasSize(3);

@@ -17,6 +17,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicReference;
+import java.util.function.Predicate;
 
 import static io.r2dbc.postgresql.TargetServerType.ANY;
 import static io.r2dbc.postgresql.TargetServerType.MASTER;
@@ -103,7 +104,7 @@ class MultiHostClientFactory extends ClientFactoryBase {
 
     private Flux<SocketAddress> getCandidates(TargetServerType targetServerType) {
         return Flux.create(sink -> {
-            long now = System.currentTimeMillis();
+            Predicate<Long> needsRecheck = updated -> System.currentTimeMillis() > updated + this.configuration.getHostRecheckTime().toMillis();
             List<SocketAddress> addresses = new ArrayList<>(this.addresses);
             if (this.configuration.isLoadBalanceHosts()) {
                 Collections.shuffle(addresses);
@@ -111,7 +112,7 @@ class MultiHostClientFactory extends ClientFactoryBase {
             int counter = 0;
             for (SocketAddress address : addresses) {
                 HostSpecStatus currentStatus = this.statusMap.get(address);
-                if (currentStatus == null || now > currentStatus.updated + this.configuration.getHostRecheckTime()) {
+                if (currentStatus == null || needsRecheck.test(currentStatus.updated)) {
                     sink.next(address);
                     counter++;
                 } else if (targetServerType.allowStatus(currentStatus.hostStatus)) {
@@ -155,13 +156,8 @@ class MultiHostClientFactory extends ClientFactoryBase {
                         client.close().subscribe(v -> sink.success(), sink::error, sink::success, sink.currentContext());
                     }
                 },
-                sink::error,
-                () -> {
-                },
-                sink.currentContext()
-            );
-        }, sink::error, () -> {
-        }, sink.currentContext()));
+                sink::error, () -> {}, sink.currentContext());
+        }, sink::error, () -> {}, sink.currentContext()));
     }
 
     enum HostStatus {

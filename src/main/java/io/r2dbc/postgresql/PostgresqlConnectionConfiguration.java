@@ -623,7 +623,7 @@ public final class PostgresqlConnectionConfiguration {
          * @param hostRecheckTime host recheck time in milliseconds
          * @return this {@link Builder}
          */
-        public Builder hostRecheckTime(int hostRecheckTime) {
+        public Builder hostRecheckTime(Duration hostRecheckTime) {
             if (this.multiHostConfiguration == null) {
                 this.multiHostConfiguration = MultiHostConfiguration.builder();
             }
@@ -935,7 +935,7 @@ public final class PostgresqlConnectionConfiguration {
             this.multiHostConfiguration.targetServerType(targetServerType);
             return this;
         }
-        
+
         /**
          * Configure TCP KeepAlive.
          *

@@ -91,9 +91,9 @@ public final class PostgresqlConnectionFactoryProvider implements ConnectionFact
     public static final Option<Boolean> FORCE_BINARY = Option.valueOf("forceBinary");
 
     /**
-     * Host status recheck time im ms.
+     * Host status recheck time.
      */
-    public static final Option<Integer> HOST_RECHECK_TIME = Option.valueOf("hostRecheckTime");
+    public static final Option<Duration> HOST_RECHECK_TIME = Option.valueOf("hostRecheckTime");
 
     /**
      * Load balance hosts.
@@ -130,14 +130,14 @@ public final class PostgresqlConnectionFactoryProvider implements ConnectionFact
     public static final String POSTGRESQL_DRIVER = "postgresql";
 
     /**
-     * Failover driver protocol.
-     */
-    public static final String FAILOVER_PROTOCOL = "failover";
-
-    /**
      * Legacy driver option value.
      */
     public static final String LEGACY_POSTGRESQL_DRIVER = "postgres";
+
+    /**
+     * Failover driver protocol.
+     */
+    public static final String FAILOVER_PROTOCOL = "failover";
 
     /**
      * Configure whether {@link Codecs codecs} should prefer attached data buffers. The default is {@code false}, meaning that codecs will copy data from the input buffer into a {@code byte[]}
@@ -278,7 +278,7 @@ public final class PostgresqlConnectionFactoryProvider implements ConnectionFact
 
         String protocol = (String) options.getValue(PROTOCOL);
         if (protocol != null && FAILOVER_PROTOCOL.equals(protocol)) {
-            mapper.from(HOST_RECHECK_TIME).map(OptionMapper::toInteger).to(builder::hostRecheckTime);
+            mapper.from(HOST_RECHECK_TIME).map(OptionMapper::toDuration).to(builder::hostRecheckTime);
             mapper.from(LOAD_BALANCE_HOSTS).map(OptionMapper::toBoolean).to(builder::loadBalanceHosts);
             mapper.from(TARGET_SERVER_TYPE).map(value -> OptionMapper.toEnum(value, TargetServerType.class)).to(builder::targetServerType);
             String hosts = "" + options.getRequiredValue(HOST);
