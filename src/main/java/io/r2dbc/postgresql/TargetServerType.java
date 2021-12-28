@@ -36,9 +36,8 @@ public enum TargetServerType {
 
     @Nullable
     public static TargetServerType fromValue(String value) {
-        String fixedValue = value.replace("lave", "econdary");
         for (TargetServerType type : values()) {
-            if (type.value.equals(fixedValue)) {
+            if (type.value.equals(value)) {
                 return type;
             }
         }

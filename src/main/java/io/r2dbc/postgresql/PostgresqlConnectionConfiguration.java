@@ -919,7 +919,7 @@ public final class PostgresqlConnectionConfiguration {
         }
 
         /**
-         * Allows opening connections to only servers with required state, the allowed values are any, master, slave, secondary, preferSlave and preferSecondary.
+         * Allows opening connections to only servers with required state, the allowed values are any, master, secondary and preferSecondary.
          * The master/secondary distinction is currently done by observing if the server allows writes.
          * The value preferSecondary tries to connect to secondary if any are available, otherwise allows falls back to connecting also to master.
          * Default value is any.
