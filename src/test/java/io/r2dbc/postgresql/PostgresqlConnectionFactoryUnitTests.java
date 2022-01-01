@@ -17,6 +17,7 @@
 package io.r2dbc.postgresql;
 
 import com.ongres.scram.client.ScramClient;
+import io.netty.channel.unix.DomainSocketAddress;
 import io.r2dbc.postgresql.client.Client;
 import io.r2dbc.postgresql.client.TestClient;
 import io.r2dbc.postgresql.message.backend.AuthenticationMD5Password;
@@ -33,6 +34,8 @@ import reactor.core.publisher.Mono;
 import reactor.test.StepVerifier;
 
 import java.util.Collections;
+import java.util.HashMap;
+import java.util.Map;
 
 import static com.ongres.scram.client.ScramClient.ChannelBinding.NO;
 import static com.ongres.scram.common.stringprep.StringPreparations.NO_PREPARATION;
@@ -159,8 +162,8 @@ final class PostgresqlConnectionFactoryUnitTests {
     }
 
 
-    private ClientFactory testClientFactory(Client client, PostgresqlConnectionConfiguration configuration) {
-        return new SingleHostClientFactory(configuration, (endpoint, settings) -> Mono.just(client));
+    private ConnectionStrategy testClientFactory(Client client, PostgresqlConnectionConfiguration configuration) {
+        return new DefaultConnectionStrategy((endpoint, settings) -> Mono.just(client), new DomainSocketAddress(""), configuration, null, new HashMap<>());
     }
 
 }
