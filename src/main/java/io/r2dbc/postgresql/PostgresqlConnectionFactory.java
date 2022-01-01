@@ -50,7 +50,7 @@ public final class PostgresqlConnectionFactory implements ConnectionFactory {
 
     private static final String REPLICATION_DATABASE = "database";
 
-    private final ClientFactory clientFactory;
+    private final ConnectionStrategy connectionStrategy;
 
     private final PostgresqlConnectionConfiguration configuration;
 
@@ -64,13 +64,13 @@ public final class PostgresqlConnectionFactory implements ConnectionFactory {
      */
     public PostgresqlConnectionFactory(PostgresqlConnectionConfiguration configuration) {
         this.configuration = Assert.requireNonNull(configuration, "configuration must not be null");
-        this.clientFactory = ClientFactory.getFactory(configuration, DEFAULT_CLIENT_SUPPLIER);
+        this.connectionStrategy = ConnectionStrategyFactory.getConnectionStrategy(DEFAULT_CLIENT_SUPPLIER, configuration);
         this.extensions = getExtensions(configuration);
     }
 
-    PostgresqlConnectionFactory(ClientFactory clientFactory, PostgresqlConnectionConfiguration configuration) {
+    PostgresqlConnectionFactory(ConnectionStrategy connectionStrategy, PostgresqlConnectionConfiguration configuration) {
         this.configuration = Assert.requireNonNull(configuration, "configuration must not be null");
-        this.clientFactory = Assert.requireNonNull(clientFactory, "clientFactory must not be null");
+        this.connectionStrategy = Assert.requireNonNull(connectionStrategy, "clientFactory must not be null");
         this.extensions = getExtensions(configuration);
     }
 
@@ -91,7 +91,7 @@ public final class PostgresqlConnectionFactory implements ConnectionFactory {
             throw new UnsupportedOperationException("Cannot create replication connection through create(). Use replication() method instead.");
         }
 
-        return doCreateConnection(false, this.configuration.getOptions()).cast(io.r2dbc.postgresql.api.PostgresqlConnection.class);
+        return doCreateConnection(false, this.connectionStrategy).cast(io.r2dbc.postgresql.api.PostgresqlConnection.class);
     }
 
     /**
@@ -104,12 +104,12 @@ public final class PostgresqlConnectionFactory implements ConnectionFactory {
         Map<String, String> options = new LinkedHashMap<>(this.configuration.getOptions());
         options.put(REPLICATION_OPTION, REPLICATION_DATABASE);
 
-        return doCreateConnection(true, options).map(DefaultPostgresqlReplicationConnection::new);
+        return doCreateConnection(true, this.connectionStrategy.withOptions(options)).map(DefaultPostgresqlReplicationConnection::new);
     }
 
-    private Mono<PostgresqlConnection> doCreateConnection(boolean forReplication, @Nullable Map<String, String> options) {
+    private Mono<PostgresqlConnection> doCreateConnection(boolean forReplication, ConnectionStrategy connectionStrategy) {
 
-        return this.clientFactory.create(options)
+        return connectionStrategy.connect()
             .flatMap(client -> {
 
                 DefaultCodecs codecs = new DefaultCodecs(client.getByteBufAllocator(), this.configuration.isPreferAttachedBuffers());
@@ -178,7 +178,7 @@ public final class PostgresqlConnectionFactory implements ConnectionFactory {
     @Override
     public String toString() {
         return "PostgresqlConnectionFactory{" +
-            "clientFactory=" + this.clientFactory +
+            "clientFactory=" + this.connectionStrategy +
             ", configuration=" + this.configuration +
             ", extensions=" + this.extensions +
             '}';

@@ -5,26 +5,26 @@ import javax.annotation.Nullable;
 public enum TargetServerType {
     ANY("any") {
         @Override
-        public boolean allowStatus(MultiHostClientFactory.HostStatus hostStatus) {
-            return hostStatus != MultiHostClientFactory.HostStatus.CONNECT_FAIL;
+        public boolean allowStatus(MultiHostConnectionStrategy.HostStatus hostStatus) {
+            return hostStatus != MultiHostConnectionStrategy.HostStatus.CONNECT_FAIL;
         }
     },
     MASTER("master") {
         @Override
-        public boolean allowStatus(MultiHostClientFactory.HostStatus hostStatus) {
-            return hostStatus == MultiHostClientFactory.HostStatus.PRIMARY || hostStatus == MultiHostClientFactory.HostStatus.CONNECT_OK;
+        public boolean allowStatus(MultiHostConnectionStrategy.HostStatus hostStatus) {
+            return hostStatus == MultiHostConnectionStrategy.HostStatus.PRIMARY || hostStatus == MultiHostConnectionStrategy.HostStatus.CONNECT_OK;
         }
     },
     SECONDARY("secondary") {
         @Override
-        public boolean allowStatus(MultiHostClientFactory.HostStatus hostStatus) {
-            return hostStatus == MultiHostClientFactory.HostStatus.STANDBY || hostStatus == MultiHostClientFactory.HostStatus.CONNECT_OK;
+        public boolean allowStatus(MultiHostConnectionStrategy.HostStatus hostStatus) {
+            return hostStatus == MultiHostConnectionStrategy.HostStatus.STANDBY || hostStatus == MultiHostConnectionStrategy.HostStatus.CONNECT_OK;
         }
     },
     PREFER_SECONDARY("preferSecondary") {
         @Override
-        public boolean allowStatus(MultiHostClientFactory.HostStatus hostStatus) {
-            return hostStatus == MultiHostClientFactory.HostStatus.STANDBY || hostStatus == MultiHostClientFactory.HostStatus.CONNECT_OK;
+        public boolean allowStatus(MultiHostConnectionStrategy.HostStatus hostStatus) {
+            return hostStatus == MultiHostConnectionStrategy.HostStatus.STANDBY || hostStatus == MultiHostConnectionStrategy.HostStatus.CONNECT_OK;
         }
     };
 
@@ -48,5 +48,5 @@ public enum TargetServerType {
         return value;
     }
 
-    public abstract boolean allowStatus(MultiHostClientFactory.HostStatus hostStatus);
+    public abstract boolean allowStatus(MultiHostConnectionStrategy.HostStatus hostStatus);
 }
