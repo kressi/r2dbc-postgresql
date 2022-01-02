@@ -14,7 +14,7 @@ import javax.annotation.Nullable;
 import java.net.SocketAddress;
 import java.util.Map;
 
-public class DefaultConnectionStrategy implements ConnectionStrategy {
+public class DefaultConnectionStrategy implements ConnectionStrategy.ComposableConnectionStrategy {
 
     private final SocketAddress address;
 
@@ -50,17 +50,17 @@ public class DefaultConnectionStrategy implements ConnectionStrategy {
     }
 
     @Override
-    public ConnectionStrategy withAddress(SocketAddress address) {
+    public ComposableConnectionStrategy withAddress(SocketAddress address) {
         return new DefaultConnectionStrategy(address, this.clientSupplier, this.configuration, this.connectionSettings, this.options);
     }
 
     @Override
-    public ConnectionStrategy withConnectionSettings(ConnectionSettings connectionSettings) {
+    public ComposableConnectionStrategy withConnectionSettings(ConnectionSettings connectionSettings) {
         return new DefaultConnectionStrategy(this.address, this.clientSupplier, this.configuration, connectionSettings, this.options);
     }
 
     @Override
-    public ConnectionStrategy withOptions(Map<String, String> options) {
+    public ComposableConnectionStrategy withOptions(Map<String, String> options) {
         return new DefaultConnectionStrategy(this.address, this.clientSupplier, this.configuration, this.connectionSettings, options);
     }
 

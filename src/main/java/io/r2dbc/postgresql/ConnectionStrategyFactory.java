@@ -19,8 +19,8 @@ public class ConnectionStrategyFactory {
         SSLConfig sslConfig = configuration.getSslConfig();
         SocketAddress address = singleHostConfiguration != null ? createSocketAddress(singleHostConfiguration) : null;
         return new DefaultConnectionStrategy(address, clientSupplier, configuration, configuration.getConnectionSettings(), configuration.getOptions())
-            .andThen(!SSLMode.DISABLE.equals(sslConfig.getSslMode()), strategy -> new SslFallbackConnectionStrategy(configuration, strategy, configuration.getOptions()))
-            .andThen(multiHostConfiguration != null, strategy -> new MultiHostConnectionStrategy(createSocketAddress(multiHostConfiguration), configuration, strategy));
+            .chainIf(!SSLMode.DISABLE.equals(sslConfig.getSslMode()), strategy -> new SslFallbackConnectionStrategy(configuration, strategy), ConnectionStrategy.ComposableConnectionStrategy.class)
+            .chainIf(multiHostConfiguration != null, strategy -> new MultiHostConnectionStrategy(createSocketAddress(multiHostConfiguration), configuration, strategy), ConnectionStrategy.class);
     }
 
     private static SocketAddress createSocketAddress(SingleHostConfiguration configuration) {

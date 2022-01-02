@@ -6,24 +6,20 @@ import io.r2dbc.postgresql.client.SSLConfig;
 import io.r2dbc.postgresql.client.SSLMode;
 import reactor.core.publisher.Mono;
 
-import javax.annotation.Nullable;
 import java.net.SocketAddress;
 import java.util.Map;
 import java.util.function.Function;
 import java.util.function.Predicate;
 
-public class SslFallbackConnectionStrategy implements ConnectionStrategy {
+public class SslFallbackConnectionStrategy implements ConnectionStrategy.ComposableConnectionStrategy {
 
     private final PostgresqlConnectionConfiguration configuration;
 
-    private final ConnectionStrategy connectionStrategy;
+    private final ComposableConnectionStrategy connectionStrategy;
 
-    private final Map<String, String> options;
-
-    SslFallbackConnectionStrategy(PostgresqlConnectionConfiguration configuration, ConnectionStrategy connectionStrategy, @Nullable Map<String, String> options) {
+    SslFallbackConnectionStrategy(PostgresqlConnectionConfiguration configuration, ComposableConnectionStrategy connectionStrategy) {
         this.configuration = configuration;
         this.connectionStrategy = connectionStrategy;
-        this.options = options;
     }
 
     @Override
@@ -47,18 +43,18 @@ public class SslFallbackConnectionStrategy implements ConnectionStrategy {
     }
 
     @Override
-    public ConnectionStrategy withAddress(SocketAddress address) {
-        return new SslFallbackConnectionStrategy(this.configuration, this.connectionStrategy.withAddress(address), this.options);
+    public ComposableConnectionStrategy withAddress(SocketAddress address) {
+        return new SslFallbackConnectionStrategy(this.configuration, this.connectionStrategy.withAddress(address));
     }
 
     @Override
-    public ConnectionStrategy withConnectionSettings(ConnectionSettings connectionSettings) {
-        return new SslFallbackConnectionStrategy(this.configuration, this.connectionStrategy.withConnectionSettings(connectionSettings), this.options);
+    public ComposableConnectionStrategy withConnectionSettings(ConnectionSettings connectionSettings) {
+        return new SslFallbackConnectionStrategy(this.configuration, this.connectionStrategy.withConnectionSettings(connectionSettings));
     }
 
     @Override
-    public ConnectionStrategy withOptions(Map<String, String> options) {
-        return new SslFallbackConnectionStrategy(this.configuration, this.connectionStrategy.withOptions(options), options);
+    public ComposableConnectionStrategy withOptions(Map<String, String> options) {
+        return new SslFallbackConnectionStrategy(this.configuration, this.connectionStrategy.withOptions(options));
     }
 
 }

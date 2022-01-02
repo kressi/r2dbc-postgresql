@@ -10,15 +10,22 @@ import java.util.function.Function;
 
 public interface ConnectionStrategy {
 
-    default ConnectionStrategy andThen(boolean guard, Function<ConnectionStrategy, ConnectionStrategy> nextStrategyProvider) {
-        return guard ? nextStrategyProvider.apply(this) : this;
-    }
-
     Mono<Client> connect();
 
-    ConnectionStrategy withAddress(SocketAddress address);
-
-    ConnectionStrategy withConnectionSettings(ConnectionSettings connectionSettings);
-
     ConnectionStrategy withOptions(Map<String, String> options);
+
+    interface ComposableConnectionStrategy extends ConnectionStrategy {
+
+        default  <T extends ConnectionStrategy> T chainIf(boolean guard, Function<ComposableConnectionStrategy, T> nextStrategyProvider, Class<T> klass) {
+            return guard ? nextStrategyProvider.apply(this) : klass.cast(this);
+        }
+
+        ComposableConnectionStrategy withAddress(SocketAddress address);
+
+        ComposableConnectionStrategy withConnectionSettings(ConnectionSettings connectionSettings);
+
+        ComposableConnectionStrategy withOptions(Map<String, String> options);
+
+    }
+
 }
